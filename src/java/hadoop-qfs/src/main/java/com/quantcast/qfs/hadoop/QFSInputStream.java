@@ -52,6 +52,7 @@ implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
     }
   }
 
+  @Override
   public boolean hasCapability(final String capability) {
     switch (StringUtils.toLowerCase(capability)) {
       case StreamCapabilities.UNBUFFER:
@@ -65,6 +66,7 @@ implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
     }
   }
 
+  @Override
   public long getPos() throws IOException {
     if (kfsChannel == null) {
       throw new IOException("File closed");
@@ -72,24 +74,29 @@ implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
     return kfsChannel.tell();
   }
 
+  @Override
   public int available() throws IOException {
     return (int) (this.fsize - getPos());
   }
 
+  @Override
   public void seek(long targetPos) throws IOException {
     kfsChannel.seek(targetPos);
   }
 
+  @Override
   public boolean seekToNewSource(long targetPos)
     throws IOException {
     return false;
   }
 
+  @Override
   public int read(final ByteBuffer buffer)
   throws IOException {
     return kfsChannel.read(buffer);
   }
 
+  @Override
   public int read() throws IOException {
     int c = kfsChannel.read();
 
@@ -98,6 +105,7 @@ implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
     return c;
   }
 
+  @Override
   public int read(byte b[], int off, int len) throws IOException {
     final int res = kfsChannel.read(ByteBuffer.wrap(b, off, len));
     // Use -1 to signify EOF
@@ -110,14 +118,17 @@ implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
     return res;
   }
 
+  @Override
   public void unbuffer() {
     kfsChannel.unbuffer();
   }
 
+  @Override
   public void close() throws IOException {
     kfsChannel.close();
   }
 
+  @Override
   public void setReadahead(Long readAheadSize) {
     kfsChannel.setReadAheadSize(readAheadSize);
   }
