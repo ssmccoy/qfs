@@ -55,7 +55,7 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
         kfsAccess = ka;
     }
 
-    public synchronized boolean isOpen()
+    public boolean isOpen()
     {
         return kfsFd >= 0;
 
@@ -65,7 +65,7 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
     // -- fill some data into a direct mapped byte buffer
     // -- send/receive to the other side (Jave->C++ or vice-versa)
     //
-    public synchronized int read(ByteBuffer dst) throws IOException
+    public int read(ByteBuffer dst) throws IOException
     {
         if (kfsFd < 0) {
             throw new IOException("File closed");
@@ -135,7 +135,7 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
 
     // is modeled after the seek of Java's RandomAccessFile; offset is
     // the offset from the beginning of the file.
-    public synchronized long seek(long offset) throws IOException
+    public long seek(long offset) throws IOException
     {
         if (offset < 0) {
             throw new IllegalArgumentException("seek(" + kfsFd + "," + offset + ")");
@@ -148,7 +148,7 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
         return kfsAccess.kfs_seek(kfsFd, offset);
     }
 
-    public synchronized long tell() throws IOException
+    public long tell() throws IOException
     {
         if (kfsFd < 0) {
             throw new IOException("File closed");
@@ -165,7 +165,7 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
         return ret - rem;
     }
 
-    public synchronized void close() throws IOException
+    public void close() throws IOException
     {
         if (kfsFd < 0) {
             return;

@@ -53,20 +53,20 @@ class QFSInputStream extends FSInputStream {
     return kfsChannel.tell();
   }
 
-  public synchronized int available() throws IOException {
+  public int available() throws IOException {
     return (int) (this.fsize - getPos());
   }
 
-  public synchronized void seek(long targetPos) throws IOException {
+  public void seek(long targetPos) throws IOException {
     kfsChannel.seek(targetPos);
   }
 
-  public synchronized boolean seekToNewSource(long targetPos)
+  public boolean seekToNewSource(long targetPos)
     throws IOException {
     return false;
   }
 
-  public synchronized int read() throws IOException {
+  public int read() throws IOException {
     byte b[] = new byte[1];
     int res = read(b, 0, 1);
     if (res == 1) {
@@ -78,7 +78,7 @@ class QFSInputStream extends FSInputStream {
     return -1;
   }
 
-  public synchronized int read(byte b[], int off, int len) throws IOException {
+  public int read(byte b[], int off, int len) throws IOException {
     final int res = kfsChannel.read(ByteBuffer.wrap(b, off, len));
     // Use -1 to signify EOF
     if (res == 0) {
@@ -90,7 +90,7 @@ class QFSInputStream extends FSInputStream {
     return res;
   }
 
-  public synchronized void close() throws IOException {
+  public void close() throws IOException {
     kfsChannel.close();
   }
 
