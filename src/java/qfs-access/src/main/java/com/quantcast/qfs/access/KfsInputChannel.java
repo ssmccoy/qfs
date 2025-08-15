@@ -125,6 +125,10 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
             readNext();
         }
 
+        if (!readBuffer.hasRemaining()) {
+            return -1;
+        }
+
         return readBuffer.get();
     }
 
