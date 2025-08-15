@@ -120,6 +120,14 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
         return readBuffer;
     }
 
+    public int read() throws IOException {
+        if (!readBuffer.hasRemaining()) {
+            readNext();
+        }
+
+        return readBuffer.get();
+    }
+
     private void readDirect(ByteBuffer buf, int remRequestedBytes) throws IOException
     {
         if (!buf.isDirect()) {
@@ -163,6 +171,10 @@ final public class KfsInputChannel implements ReadableByteChannel, Positionable
                 " less than buffered: " + rem);
         }
         return ret - rem;
+    }
+
+    public void unbuffer() {
+        readBuffer.clear();
     }
 
     public void close() throws IOException

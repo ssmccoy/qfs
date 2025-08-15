@@ -23,12 +23,18 @@ import java.nio.ByteBuffer;
 
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FSInputStream;
+import org.apache.hadoop.fs.StreamCapabilities;
+import org.apache.hadoop.fs.ByteBufferReadable;
+import org.apache.hadoop.fs.CanUnbuffer;
+import org.apache.hadoop.fs.CanSetReadahead;
+import org.apache.hadoop.util.StringUtils;
 
 import com.quantcast.qfs.access.KfsAccess;
 import com.quantcast.qfs.access.KfsInputChannel;
 
-class QFSInputStream extends FSInputStream {
-
+class QFSInputStream extends FSInputStream
+implements StreamCapabilities, ByteBufferReadable, CanUnbuffer, CanSetReadahead
+{
   private final KfsInputChannel kfsChannel;
   private FileSystem.Statistics statistics;
   private final long fsize;
@@ -43,6 +49,19 @@ class QFSInputStream extends FSInputStream {
     this.fsize = kfsAccess.kfs_filesize(path);
     if (this.fsize < 0) {
         kfsAccess.kfs_retToIOException((int)this.fsize);
+    }
+  }
+
+  public boolean hasCapability(final String capability) {
+    switch (StringUtils.toLowerCase(capability)) {
+      case StreamCapabilities.UNBUFFER:
+      case StreamCapabilities.READBYTEBUFFER:
+      case StreamCapabilities.READAHEAD:
+        return true;
+      case StreamCapabilities.PREADBYTEBUFFER:
+      case StreamCapabilities.DROPBEHIND:
+      default:
+        return false;
     }
   }
 
@@ -66,16 +85,17 @@ class QFSInputStream extends FSInputStream {
     return false;
   }
 
+  public int read(final ByteBuffer buffer)
+  throws IOException {
+    return kfsChannel.read(buffer);
+  }
+
   public int read() throws IOException {
-    byte b[] = new byte[1];
-    int res = read(b, 0, 1);
-    if (res == 1) {
-      if (statistics != null) {
-        statistics.incrementBytesRead(1);
-      }
-      return ((int) (b[0] & 0xff));
-    }
-    return -1;
+    int c = kfsChannel.read();
+
+    statistics.incrementBytesRead(1);
+
+    return c;
   }
 
   public int read(byte b[], int off, int len) throws IOException {
@@ -90,11 +110,15 @@ class QFSInputStream extends FSInputStream {
     return res;
   }
 
+  public void unbuffer() {
+    kfsChannel.unbuffer();
+  }
+
   public void close() throws IOException {
     kfsChannel.close();
   }
 
-  public void setReadAheadSize(long readAheadSize) {
+  public void setReadahead(Long readAheadSize) {
     kfsChannel.setReadAheadSize(readAheadSize);
   }
 }
